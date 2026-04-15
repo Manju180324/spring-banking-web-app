@@ -11,7 +11,7 @@ public class AccountController {
     private final AccountService accountService;
 
     @PostMapping
-    private Account createAccount(@RequestParam Long userId,
+    private AccountResponseDTO createAccount(@RequestParam Long userId,
                                   @RequestParam String accountType,
                                   @RequestParam Double balance) {
         return accountService.createAccount(userId, accountType, balance);

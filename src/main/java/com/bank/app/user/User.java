@@ -23,8 +23,9 @@ public class User {
 
 
 // What You Just Built
-// Plain class ✅
-// Mapped to database table ✅
-// Managed by Hibernate/JPA ✅
-// 👉 So:
+// Plain class
+// Mapped to database table
+// Managed by Hibernate/JPA
+
+// So:
 // “This is a JPA Entity, not just a POJO”

@@ -11,7 +11,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
 
-    public Account createAccount(Long userId, String accountType, Double balance) {
+    public AccountResponseDTO createAccount(Long userId, String accountType, Double balance) {
         // Get user from DB
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -24,6 +24,13 @@ public class AccountService {
         account.setAccountType(accountType);
         account.setBalance(balance);
 
-        return accountRepository.save(account);
+        Account savedAccount = accountRepository.save(account);
+
+        return new AccountResponseDTO(
+                savedAccount.getId(),
+                savedAccount.getAccountType(),
+                savedAccount.getBalance(),
+                savedAccount.getUser().getId()
+        );
     }
 }

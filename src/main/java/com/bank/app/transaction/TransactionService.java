@@ -7,12 +7,51 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
     private final AccountRepository accountRepository;
     private final  TransactionRepository transactionRepository;
+
+    @Transactional
+    public void deposit(Long accountId, Double amount) {
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        account.setBalance(account.getBalance() + amount);
+
+        Transaction tx = new Transaction();
+        tx.setAmount(amount);
+        tx.setType("DEPOSIT");
+        tx.setToAccount(account);
+        tx.setTimestamp(LocalDateTime.now());
+
+        transactionRepository.save(tx);
+    }
+
+    @Transactional
+    public void withdraw(Long accountId, Double amount) {
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        if (account.getBalance() < amount) {
+            throw new RuntimeException("Insufficient balance");
+        }
+
+        account.setBalance(account.getBalance() - amount);
+
+        Transaction tx = new Transaction();
+        tx.setAmount(amount);
+        tx.setType("WITHDRAW");
+        tx.setFromAccount(account);
+        tx.setTimestamp(LocalDateTime.now());
+
+        transactionRepository.save(tx);
+    }
 
     @Transactional
     public void transfer(Long fromAccountId, Long toAccountId, Double amount) {
@@ -48,5 +87,20 @@ public class TransactionService {
         tx.setToAccount(toAccount);
 
         transactionRepository.save(tx);
+    }
+
+    public List<TransactionResponseDTO> getTransactionsByAccount(Long accountId) {
+
+        List<Transaction> transactions =
+                transactionRepository.findByFromAccountIdOrToAccountId(accountId, accountId);
+
+        return transactions.stream().map(tx -> new TransactionResponseDTO(
+                tx.getId(),
+                tx.getAmount(),
+                tx.getType(),
+                tx.getTimestamp(),
+                tx.getFromAccount() != null ? tx.getFromAccount().getId() : null,
+                tx.getToAccount() != null ? tx.getToAccount().getId() : null
+        )).toList();
     }
 }
